@@ -1,23 +1,28 @@
-# AWS Detection/Security Home-Lab
+# AWS Detection Lab
 
-A hands-on cloud security lab built to close a real gap: practical AWS/Terraform experience backing up RMF/ISSO/compliance-focused DoD contracting work.
+Terraform-provisioned AWS infrastructure that feeds CloudTrail and VPC Flow Logs into Splunk, with authenticated vulnerability scanning and a POA&M remediation tracker. MITRE ATT&CK-mapped detections are next.
 
 ## Stack
-Terraform → AWS (VPC/EC2/IAM) → Splunk Free → Nessus/OpenVAS → MITRE ATT&CK detections
+
+Terraform → AWS (VPC, EC2, IAM, S3, SQS, CloudTrail, VPC Flow Logs) → Splunk Enterprise (free mode) → Nessus Essentials → MITRE ATT&CK detections (planned)
+
+Infrastructure is created and destroyed with `terraform apply` / `terraform destroy` each session to keep costs down.
 
 ## Status
-**Phase 1 complete:** VPC, subnet, IGW, route table, security group, IAM role/instance profile, and EC2 instance provisioned via Terraform. SSH access verified.
 
-## Roadmap
-1. Terraform + AWS foundation (VPC, EC2, IAM) - done
-2. Splunk Free deployment + CloudTrail/VPC Flow Log ingestion
-3. Vulnerability scanning (Nessus/OpenVAS) + POA&M remediation tracker
-4. Detections mapped to MITRE ATT&CK techniques
-5. Full documentation pass (architecture diagram, write-up)
+**Phase 1 (complete): Terraform foundation.** VPC, subnet, internet gateway, route table, security group, IAM role/instance profile, and EC2 instance provisioned as code. SSH access verified.
+
+**Phase 2 (complete): Splunk log pipeline.** Splunk Enterprise deployed on the EC2 instance. Terraform provisions an S3 log bucket, CloudTrail, VPC Flow Logs, and two SQS queues. The AWS Add-on for Splunk ingests both CloudTrail and VPC Flow Logs through SQS-based S3 inputs, with live data verified in Splunk.
+
+**Phase 3 (complete): Vulnerability assessment and POA&M.** Credentialed Nessus Essentials scan of the lab host (Amazon Linux 2023) over SSH with sudo escalation. No Critical, High, Medium, or Low findings; the remaining informational results were reviewed for actionable hardening items, which are tracked in a POA&M with remediation steps, status, and target dates (for example, SELinux running in permissive mode and SSH SHA-1 HMAC algorithms enabled). See [`scans/poam-session3.md`](scans/poam-session3.md), including the methodology note on diagnosing a privilege-escalation problem in the scan configuration.
+
+**Phase 4 (planned):** Splunk searches mapped to MITRE ATT&CK techniques.
+
+**Phase 5 (planned):** Architecture diagram and full write-up.
 
 ## Structure
-terraform/    - IaC for VPC/EC2/IAM
-splunk/       - SIEM config (session 2)
-scans/        - vulnerability scan reports + POA&M tracker (session 3)
-detections/   - Splunk searches + ATT&CK mapping (session 4)
-docs/         - architecture diagram + write-up (session 5)
+
+```
+terraform/   IaC for the VPC, EC2, IAM, S3, SQS, CloudTrail, and VPC Flow Logs
+scans/       Vulnerability scan results and POA&M tracker
+```
